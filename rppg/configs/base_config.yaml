@@ -1,18 +1,18 @@
 ---
-data_root_path: "/ssd/ssd0/dataset/raw/rppg/"            # raw data path
-dataset_path: "/ssd/ssd0/dataset/preprocessed/rppg/"     # preprocessed data save/load path
-model_save_path: "/ssd/ssd0/models/rppg/"                # model save path
+data_root_path: "/home/alinle/data/"            # raw data path
+dataset_path: "/home/alinle/dataset/"     # preprocessed data save/load path
+model_save_path: "/home/alinle/model/"                # model save path
 
 preprocess:
   flag: False                                            # true: preprocess, false: not preprocess
 
   common:
-    process_num: 48                                       # number of task per process for multiprocessing
-    type: DIFF                                           # "DIFF" or "CONT"
+    process_num: 10                                       # number of task per process for multiprocessing
+    type: CONT                                           # "DIFF" or "CONT"
     fixed_position: 1                                    # 0: face tracking, 1: fixed position
     face_detect_algorithm: 1                             # 1: face recognition, 2: FaceMesh
     larger_box_coef: 1.5
-    image_size: 128                                      # cropped image size
+    image_size: 64                                     # cropped image size
 
   train_dataset:
     name: UBFC                                           # dataset name
@@ -38,16 +38,16 @@ wandb:
 
 
 fit:
-  model: EfficientPhys
-  type: DIFF
-  time_length: 180
+  model: PhysNet
+  type: CONT
+  time_length: 32
   overlap_interval: 0 # default 0
-  img_size: 72
-  train_flag: False
+  img_size: 64
+  train_flag: True
   eval_flag: True
   eval_interval: 100
-  debug_flag: True                        # True: debug mode (load small dataset, False: normal mode
-  model_save_flag: True                   # True: save model, False: not save model
+  debug_flag: false                        # True: debug mode (load small dataset, False: normal mode
+  model_save_flag: False                   # True: save model, False: not save model
 
   train:
     dataset: UBFC
@@ -55,7 +55,7 @@ fit:
     fs: 30 #video fps
     batch_size: 8
     learning_rate: 0.009
-    epochs: 15
+    epochs: 30
     loss: MSE
     optimizer: AdamW
     meta:
@@ -66,13 +66,12 @@ fit:
 
   test:
     dataset: UBFC
-    shuffle: False
+    shuffle: True
     fs: 30 #video fps
     batch_size: 8
     vital_type: HR                             # HR or HRV
-    cal_type: PEAK                              # PEAK or FFT
+    cal_type: FFT                              # PEAK or FFT
 #    bpf: [0.75, 2.5]                            # None: None / 60~100bpm : [1, 1.67] / 45~150bpm : [0.75, 2.5]
     bpf: None                            # None: None / 60~100bpm : [1, 1.67] / 45~150bpm : [0.75, 2.5]
     metric: [ 'MAE','RMSE','MAPE','Pearson' ]
-    eval_time_length: 5 # second
-
+    eval_time_length: 10 # second

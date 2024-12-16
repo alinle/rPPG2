@@ -1,5 +1,4 @@
 import torchinfo
-
 from rppg.log import log_warning, log_info
 # DNN Method
 # from nets.models.AxisNet import AxisNet, PhysiologicalGenerator

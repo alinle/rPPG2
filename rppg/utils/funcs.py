@@ -107,6 +107,7 @@ def get_hrv(ppg_signal, fs=30.):
 
 
 def calc_hr_torch(calc_type, ppg_signals, fs=30.):
+    print(ppg_signals.is_cuda)
     test_n, sig_length = ppg_signals.shape
     hr_list = torch.empty(test_n)
     if calc_type == "FFT":
@@ -116,8 +117,10 @@ def calc_hr_torch(calc_type, ppg_signals, fs=30.):
         T = N / fs
         freq = k / T
         amplitude = torch.abs(torch.fft.rfft(ppg_signals, n=N, dim=-1)) / N
+        print(amplitude.is_cuda)
+        freq = freq.to(amplitude.device)
 
-        hr_list = freq[torch.argmax(amplitude, dim=-1)] * 60
+        hr_list = freq[torch.argmax(amplitude, dim=-1)] * 60 #torch.argmax(amplitude, dim=-1).detach().cpu()
 
         return hr_list
     else:  # calc_type == "Peak"
@@ -192,6 +195,9 @@ def get_hr(rppg, bvp, model_type, vital_type='HR', cal_type='FFT', fs=30, bpf=No
     # TODO: torch bpf
     hr_pred = calc_hr_torch(cal_type, rppg, fs)
     hr_target = calc_hr_torch(cal_type, bvp, fs)
+    # hr_pred = calculate_hr(cal_type, rppg, fs)
+    # hr_target = calculate_hr(cal_type, bvp, fs)
+
 
     if cal_type == 'PEAK':
         hr_pred, hrv_pred, index_pred = hr_pred
